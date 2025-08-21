@@ -38,15 +38,21 @@ jobs:
 
         with:
           name: dist-files
-          path: |
-            dist/
-            package.json
-
+          path: dist
+            
   # 3. دانلود Artifact و Deploy
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Get build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-files
+          
+      - name: Output contents
+        run: ls    
+
       - name: Deploy to server
         run: |
           echo "Deploying files..."
