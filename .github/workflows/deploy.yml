@@ -1,21 +1,53 @@
-name: Deploy
+name: Demo
+
 on:
-   pull_request:
-      types: opened
+  push:
+    branches:
+      - main
+
 jobs:
-  deploy:
+  # 1. تست
+  test:
     runs-on: ubuntu-latest
     steps:
-       - name: Output event data
-         run: echo "${{toJson(github.event)}}"
-       - name: Get code
-         run: actions/checkout@v3
-       - name: Install dependencies
-         run:  npm ci
-       - name: Test code 
-         run:  npm run test
-       - name: Build code
-         run: npm run build
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      - name: Install dependencies
+        run: npm ci
 
+      - name: Run tests
+        run: npm run test
 
+  # 2. بیلد + آپلود Artifact
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: |
+            dist/
+            package.json
+
+  # 3. دانلود Artifact و Deploy
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to server
+        run: |
+          echo "Deploying files..."
+          # اینجا دستور واقعی deploy رو قرار بده
+          # مثلا scp یا rsync برای کپی روی سرور
